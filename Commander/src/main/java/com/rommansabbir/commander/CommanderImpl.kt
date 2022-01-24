@@ -14,7 +14,7 @@ class CommanderImpl private constructor() :
 
     override fun register(
         subscriptionId: String,
-        commandListener: Commander.Listener
+        commandListener: Commander.Listener,
     ) {
         synchronized(subscriptionId) {
             logThis("register :: $subscriptionId")
@@ -40,15 +40,24 @@ class CommanderImpl private constructor() :
         }
     }
 
-    override fun broadcastCommand(command: Command) {
+    override fun broadcastCommand(command: Command, ignoreNoSubscriberFoundException: Boolean) {
         synchronized(command) {
             logThis("broadcastCommand :: $command")
             try {
-                if (LIST[command.receiverSubscriptionId] == null) throw NoSubscriberFound()
-                else LIST[command.receiverSubscriptionId]?.receiveCommand(command)
+                if (LIST[command.receiverSubscriptionId] == null) {
+                    if (!ignoreNoSubscriberFoundException) {
+                        throw NoSubscriberFound()
+                    } else {
+                        logThis("broadcastCommand :: Ignoring exception")
+                    }
+                } else LIST[command.receiverSubscriptionId]?.receiveCommand(command)
 
             } catch (e: Exception) {
-                throw e
+                if (!ignoreNoSubscriberFoundException) {
+                    throw e
+                } else {
+                    logThis("broadcastCommand :: Ignoring exception")
+                }
             }
         }
     }

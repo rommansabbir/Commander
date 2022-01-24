@@ -7,7 +7,7 @@ package com.rommansabbir.commander
 interface Commander {
     fun register(subscriptionId: String, commandListener: Listener)
     fun unregister(subscriptionId: String): Boolean
-    fun broadcastCommand(command: Command)
+    fun broadcastCommand(command: Command, ignoreNoSubscriberFoundException : Boolean = true)
 
     interface Listener {
         fun receiveCommand(command: Command)
